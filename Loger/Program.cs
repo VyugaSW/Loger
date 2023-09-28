@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Text.RegularExpressions;
 using MyLogger;
 using System.Security;
 using Microsoft.Build.Framework;
@@ -15,9 +15,6 @@ namespace Loger
     {
         static void Main(string[] args)
         {
-            MLogger myLogger = new MLogger(@"C:\Test");
-            IEventSource eventSource = null;
-            myLogger.Initialize(eventSource);
 
         }
     }

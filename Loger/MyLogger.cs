@@ -9,10 +9,12 @@ using System.Diagnostics;
 using System.Security;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-
+using System.Text.RegularExpressions;
 
 namespace MyLogger
 {
+
+
     public class MLogger : Logger, ILogger
     {
         private StreamWriter _streamWriter;
@@ -30,7 +32,10 @@ namespace MyLogger
         public override void Initialize(IEventSource eventSource)
         {
 
-            if (String.IsNullOrEmpty(Parameters))
+            if (!Regex.IsMatch(PathToLogFile, @"^([A-Za-z]:\\)((?:.*\\)?)([\w\s]+\.\w+)$"))
+                throw new LoggerException("Log file has wrong path");
+
+            if (String.IsNullOrEmpty(PathToLogFile))
                 throw new LoggerException("Log file wasn't set.");
 
             try
