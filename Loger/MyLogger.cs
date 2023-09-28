@@ -13,30 +13,30 @@ using Microsoft.Build.Utilities;
 
 namespace MyLogger
 {
-    internal class MyLogger : Logger, ILogger
+    public class MLogger : Logger, ILogger
     {
-        private StreamWriter streamWriter;
-        private int indent;
+        private StreamWriter _streamWriter;
+        private int _indent;
+
+        public string PathToLogFile { get; set; }
+
+        public MLogger (string pathToLogFile)
+        {
+            PathToLogFile = pathToLogFile;
+        }
+
+        public MLogger() {}
 
         public override void Initialize(IEventSource eventSource)
         {
 
-            if (Parameters == null)
+            if (String.IsNullOrEmpty(Parameters))
                 throw new LoggerException("Log file wasn't set.");
-
-            string[] parameters = Parameters.Split(';');
-
-            string logFile = parameters[0];
-            if (String.IsNullOrEmpty(logFile))
-                throw new LoggerException("Log file wasn't set.");
-
-            if (parameters.Length > 1)
-                throw new LoggerException("Too many parameters passed.");
 
             try
             {
                 // Open the file
-                streamWriter = new StreamWriter(logFile);
+                _streamWriter = new StreamWriter(PathToLogFile, true);
             }
             catch(Exception ex)
             {
@@ -108,13 +108,13 @@ namespace MyLogger
             // ProjectStartedEventArgs adds ProjectFile, TargetNames
             // Just the regular message string is good enough here.
             WriteLine(String.Empty, e);
-            indent++;
+            _indent++;
         }
 
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // The regular message string is good enough here too.
-            indent--;
+            _indent--;
             WriteLine(String.Empty, e);
         }
 
@@ -135,19 +135,19 @@ namespace MyLogger
         // Just write a line to the log
         private void WriteLine(string line, BuildEventArgs e)
         {
-            for (int i = indent; i > 0; i--)
+            for (int i = _indent; i > 0; i--)
             {
-                streamWriter.Write("\t");
+                _streamWriter.Write("\t");
             }
-            streamWriter.WriteLine($"Time: {DateTime.Now}  " + line + e.Message);
+            _streamWriter.WriteLine($"Time: {DateTime.Now}  " + line + e.Message);
         }
+
         // Shutdown() is guaranteed to be called by MSBuild at the end of the build, after all
         // events have been raised.
-
         public override void Shutdown()
         {
             // Done logging
-            streamWriter.Close();
+            _streamWriter.Close();
         }
 
     }
